@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Schedule a Service</h2>
+<form method="POST">
+    <div class="mb-3">
+        <label>Description</label>
+        <textarea class="form-control" name="descricao" required></textarea>
+    </div>
+    <div class="mb-3">
+        <label>Date</label>
+        <input class="form-control" type="date" name="data" required>
+    </div>
+    <div class="mb-3">
+        <label>Time</label>
+        <input class="form-control" type="time" name="horario" required>
+    </div>
+    <button class="btn btn-success">Submit</button>
+</form>
+{% endblock %}

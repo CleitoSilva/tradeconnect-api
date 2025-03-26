@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Bem-vindo, {{ user.username }} (Profissional)</h2>
+<p>Aqui vai a área do profissional.</p>
+<a href="{{ url_for('main.logout') }}" class="btn btn-danger">Sair</a>
+{% endblock %}
