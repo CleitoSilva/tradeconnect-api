@@ -8,9 +8,20 @@
     <h4>Your Scheduled Services:</h4>
     <ul class="list-group">
         {% for service in services %}
-        <li class="list-group-item">
-            <strong>{{ service.date }} at {{ service.time }}</strong><br>
-            {{ service.description }}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ service.description }}</strong><br>
+                {{ service.date }} at {{ service.time }}
+            </div>
+            <div>
+                {% if service.status == 'Accepted' %}
+                    <span class="badge bg-success">Accepted</span>
+                {% elif service.status == 'Rejected' %}
+                    <span class="badge bg-danger">Rejected</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark">Pending</span>
+                {% endif %}
+            </div>
         </li>
         {% endfor %}
     </ul>

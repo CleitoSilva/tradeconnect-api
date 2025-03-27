@@ -11,6 +11,8 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(50), nullable=False)  # Client or Professional
 
+    is_active = db.Column(db.Boolean, default=True)
+
     services = db.relationship('Service', backref='client', lazy=True)
 
 # Service model

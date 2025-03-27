@@ -19,29 +19,36 @@ def login():
         email = request.form['email']
         password = request.form['password']
 
-        user = User.query.filter_by(email=email).first()
         print("📌 Email digitado:", email)
+        user = User.query.filter_by(email=email).first()
         print("📌 Usuário encontrado:", user)
 
         if user:
-            senha_ok = check_password_hash(user.password, password)
-            print("🔒 Senha correta:", senha_ok)
+            # ❌ Block login if user is not active
+            if not user.is_active:
+                flash('This user is deactivated.')
+                return redirect(url_for('main.login'))
 
-            if senha_ok:
+            # ✅ Check password hash
+            if check_password_hash(user.password, password):
+                print("🔒 Senha correta:", True)
                 login_user(user)
                 print("✅ Login feito!")
-                print("🙋 Autenticado:", user.is_authenticated)
-                
+                print("🙋 Autenticado:", current_user.is_authenticated)
+
+                # 🔁 Redirect based on user role
                 if user.role == 'Client':
-                    return redirect('/dashboard_client')
+                    return redirect(url_for('main.dashboard_client'))
                 elif user.role == 'Professional':
-                    return redirect('/dashboard_professional')
+                    return redirect(url_for('main.dashboard_professional'))
+                elif user.role == 'Admin':
+                    return redirect(url_for('main.admin_dashboard'))
                 else:
-                    flash('Role inválido.')
+                    flash('Invalid role.')
             else:
-                flash('Senha incorreta.')
+                flash('Incorrect password.')
         else:
-            flash('Usuário não encontrado.')
+            flash('User not found.')
 
     return render_template('login.html')
 
@@ -141,3 +148,30 @@ def update_status(service_id, new_status):
 def logout():
     logout_user()
     return redirect(url_for('main.login'))
+
+@main.route('/admin_dashboard')
+@login_required
+def admin_dashboard():
+    if current_user.role != 'Admin':
+        flash("Access denied.")
+        return redirect(url_for('main.login'))
+
+    users = User.query.all()
+    return render_template('admin_dashboard.html', users=users)
+
+# app/routes.py
+
+@main.route('/toggle_status/<int:user_id>')
+@login_required
+def toggle_status(user_id):
+    if current_user.role != 'Admin':
+        flash("Acesso negado.")
+        return redirect(url_for('main.login'))
+
+    user = User.query.get(user_id)
+    if user:
+        user.is_active = not user.is_active
+        db.session.commit()
+        flash(f"Usuário {user.username} agora está {'ativo' if user.is_active else 'desativado'}.")
+    
+    return redirect(url_for('main.admin_dashboard'))
