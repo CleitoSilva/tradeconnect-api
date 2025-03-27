@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Schedule a New Service</h2>
+
+<form method="POST">
+    <input class="form-control mb-2" name="description" placeholder="Service description" required>
+    <input class="form-control mb-2" name="date" type="date" required>
+    <input class="form-control mb-2" name="time" type="time" required>
+
+    <button class="btn btn-success">Schedule</button>
+</form>
+
+<a href="{{ url_for('main.dashboard_client') }}" class="btn btn-secondary mt-3">Back</a>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Professional Dashboard</h2>
+
+{% if services %}
+    <ul class="list-group">
+    {% for service in services %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ service.description }}</strong><br>
+                {{ service.date }} at {{ service.time }}<br>
+                Requested by: {{ service.client.username }}
+            </div>
+            <div>
+                <a href="{{ url_for('main.update_status', service_id=service.id, new_status='Accepted') }}" class="btn btn-success btn-sm">Accept</a>
+                <a href="{{ url_for('main.update_status', service_id=service.id, new_status='Rejected') }}" class="btn btn-danger btn-sm">Reject</a>
+            </div>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No pending services.</p>
+{% endif %}
+{% endblock %}
