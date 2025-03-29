@@ -18,6 +18,12 @@ class User(UserMixin, db.Model):
     notifications = db.relationship('Notification', backref='user', lazy=True)
 
 
+    address = db.Column(db.String(255), nullable=True)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+
+
+
 # 📅 Service model
 class Service(db.Model):
     __tablename__ = 'services'
@@ -29,6 +35,8 @@ class Service(db.Model):
     status = db.Column(db.String(20), default='Pending')  # Pending, Accepted, Rejected
 
     client_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+   
+    address = db.Column(db.String(255), nullable=True)
 
 
 # 🧾 Log model

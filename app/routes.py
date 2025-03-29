@@ -4,6 +4,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from urllib.parse import urlparse, urljoin
 from .models import User, Service, Log, Notification
 from . import db
+import requests
+from flask import jsonify
+import json
 
 main = Blueprint('main', __name__)
 
@@ -56,6 +59,9 @@ def register():
         email = request.form['email']
         password = request.form['password']
         role = request.form['role']
+        address = request.form['address']
+        latitude = request.form.get('latitude')
+        longitude = request.form.get('longitude')
 
         hashed_password = generate_password_hash(password)
 
@@ -63,12 +69,16 @@ def register():
             username=username,
             email=email,
             password=hashed_password,
-            role=role
+            role=role,
+            address=address,
+            latitude=latitude if latitude else None,
+            longitude=longitude if longitude else None
         )
 
         db.session.add(new_user)
         db.session.commit()
 
+        flash("Conta criada com sucesso! Faça o login.")
         return redirect(url_for('main.login'))
 
     return render_template('register.html')
@@ -89,27 +99,30 @@ def schedule_service():
         description = request.form['description']
         date = request.form['date']
         time = request.form['time']
+        address = request.form['address']  # ✅ pega o endereço
 
         new_service = Service(
             description=description,
             date=date,
             time=time,
+            address=address,  # ✅ salva no banco
             client_id=current_user.id
         )
+
         db.session.add(new_service)
         db.session.commit()
 
-        # 🔔 NOTIFY all professionals
+        # 🔔 Notifica os profissionais ativos
         professionals = User.query.filter_by(role='Professional', is_active=True).all()
         for prof in professionals:
             notification = Notification(
                 user_id=prof.id,
-                message=f"{current_user.username} scheduled a new service for {date} at {time}"
+                message=f"{current_user.username} scheduled a service at {address} on {date} at {time}"
             )
             db.session.add(notification)
 
-        # 🔍 LOG
-        log = Log(action=f"{current_user.username} scheduled a service for {date} at {time}")
+        # 📝 Log
+        log = Log(action=f"{current_user.username} scheduled a service at {address} on {date} {time}")
         db.session.add(log)
 
         db.session.commit()
@@ -239,3 +252,47 @@ def mark_notifications_read():
     db.session.commit()
     flash("All notifications marked as read.")
     return redirect(url_for('main.dashboard_professional'))
+
+@main.route('/edit_profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    if current_user.role != 'Professional':
+        flash("Acesso negado.")
+        return redirect(url_for('main.dashboard_professional'))
+
+    if request.method == 'POST':
+        address = request.form['address']
+        current_user.address = address
+
+        # 🗺 Obtem coordenadas via API do Google Maps
+        api_key = 'AIzaSyBVoEt5W58vz-76LWwftrIHww4FBnvGVmo'
+        geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={api_key}"
+        response = requests.get(geocode_url).json()
+
+        if response['status'] == 'OK':
+            location = response['results'][0]['geometry']['location']
+            current_user.latitude = location['lat']
+            current_user.longitude = location['lng']
+            db.session.commit()
+            flash("Endereço salvo com sucesso!")
+        else:
+            flash("Erro ao localizar o endereço. Verifique e tente novamente.")
+
+    return render_template('edit_profile.html', user=current_user)
+
+# map
+@main.route('/map_professionals')
+@login_required
+def map_professionals():
+    professionals = User.query.filter_by(role='Professional', is_active=True).all()
+
+    professionals_json = json.dumps([
+        {
+            "username": user.username,
+            "latitude": user.latitude,
+            "longitude": user.longitude
+        }
+        for user in professionals if user.latitude and user.longitude
+    ])
+
+    return render_template("map_professionals.html", professionals_json=professionals_json)
