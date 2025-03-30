@@ -1,15 +1,19 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+import os
 
 db = SQLAlchemy()
 login_manager = LoginManager()
 
 def create_app():
     app = Flask(__name__)
-
     app.config['SECRET_KEY'] = 'segredo123'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mssql+pyodbc://localhost/tradeconnect?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes'
+
+    # 👉 Usa SQLite para deploy (mantém compatível com SQL)
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
+    
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
