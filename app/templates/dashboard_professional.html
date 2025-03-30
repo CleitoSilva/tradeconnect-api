@@ -42,3 +42,13 @@
 {% endblock %}
 
 <a href="{{ url_for('main.map_services') }}" class="btn btn-outline-primary mb-4">Show Services on Map</a>
+
+<h3>⭐ Client Reviews</h3>
+<ul>
+  {% for review in current_user.reviews_received %}
+    <li><strong>Rating:</strong> {{ review.rating }}<br>
+        <strong>Comment:</strong> {{ review.comment }}</li>
+  {% else %}
+    <li>No reviews yet.</li>
+  {% endfor %}
+</ul>

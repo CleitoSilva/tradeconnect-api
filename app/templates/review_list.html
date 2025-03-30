@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>📝 Reviews Received</h2>
+
+{% if reviews %}
+  <ul class="list-group">
+    {% for review in reviews %}
+    <li class="list-group-item">
+      <strong>Rating:</strong> {{ review.rating }} / 5<br>
+      <strong>Comment:</strong> {{ review.comment }}<br>
+      <strong>From Client:</strong> {{ review.client_review.username }}<br>
+      <strong>For Service:</strong> {{ review.service.description }}
+    </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No reviews received yet.</p>
+{% endif %}
+
+<a href="{{ url_for('main.dashboard_professional') }}" class="btn btn-secondary mt-3">Back</a>
+{% endblock %}

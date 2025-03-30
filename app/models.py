@@ -4,24 +4,23 @@ from . import db
 
 # 🧑 User model
 class User(UserMixin, db.Model):
-    __tablename__ = 'users'
+    __tablename__ = 'users'  # ESSENCIAL! Esse nome precisa bater com os ForeignKeys
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    role = db.Column(db.String(50), nullable=False)  # Client, Professional, Admin
+    role = db.Column(db.String(20), nullable=False)  # Client, Professional, Admin
+    address = db.Column(db.String(200))
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
     is_active = db.Column(db.Boolean, default=True)
 
-    # Relacionamentos
+    # Relationships
     services = db.relationship('Service', backref='client', lazy=True)
     notifications = db.relationship('Notification', backref='user', lazy=True)
-
-
-    address = db.Column(db.String(255), nullable=True)
-    latitude = db.Column(db.Float, nullable=True)
-    longitude = db.Column(db.Float, nullable=True)
-
+    reviews_written = db.relationship('Review', foreign_keys='Review.client_id', backref='client_review')
+    reviews_received = db.relationship('Review', foreign_keys='Review.professional_id', backref='professional_review')
 
 
 # 📅 Service model
@@ -33,21 +32,26 @@ class Service(db.Model):
     date = db.Column(db.String(20), nullable=False)
     time = db.Column(db.String(10), nullable=False)
     status = db.Column(db.String(20), default='Pending')  # Pending, Accepted, Rejected
+    address = db.Column(db.String(255))
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
 
     client_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-   
-    address = db.Column(db.String(255), nullable=True)
-    latitude = db.Column(db.Float)
-    longitude = db.Column(db.Float) 
 
 
-# 🧾 Log model
-class Log(db.Model):
-    __tablename__ = 'logs'
+# 📝 Review model
+class Review(db.Model):
+    __tablename__ = 'reviews'
 
     id = db.Column(db.Integer, primary_key=True)
-    action = db.Column(db.String(255), nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    rating = db.Column(db.Integer, nullable=False)
+    comment = db.Column(db.Text)
+
+    service_id = db.Column(db.Integer, db.ForeignKey('services.id'))
+    client_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    professional_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    service = db.relationship('Service', backref='review')
 
 
 # 🔔 Notification model
@@ -58,3 +62,12 @@ class Notification(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     message = db.Column(db.String(255), nullable=False)
     is_read = db.Column(db.Boolean, default=False)
+
+
+# 🧾 Log model
+class Log(db.Model):
+    __tablename__ = 'logs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    action = db.Column(db.String(255), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)

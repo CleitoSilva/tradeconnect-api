@@ -12,19 +12,24 @@
   <h4>Your Scheduled Services:</h4>
   <ul class="list-group">
     {% for service in services %}
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        <div>
+      <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+        <div class="mb-2">
           <strong>{{ service.description }}</strong><br>
           {{ service.date }} at {{ service.time }}<br>
           📍 {{ service.address }}
         </div>
-        <div>
+        <div class="text-end">
           {% if service.status == 'Accepted' %}
             <span class="badge bg-success">Accepted</span>
           {% elif service.status == 'Rejected' %}
             <span class="badge bg-danger">Rejected</span>
           {% else %}
             <span class="badge bg-warning text-dark">Pending</span>
+          {% endif %}
+
+          {% if service.status != 'Pending' %}
+            <!-- ⭐ Review button (goes to correct route!) -->
+            <a href="{{ url_for('main.submit_review', service_id=service.id) }}" class="btn btn-outline-primary btn-sm mt-2">Leave a Review</a>
           {% endif %}
         </div>
       </li>

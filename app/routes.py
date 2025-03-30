@@ -7,6 +7,7 @@ from . import db
 import requests
 from flask import jsonify
 import json
+from .models import User, Service, Log, Notification, Review
 
 main = Blueprint('main', __name__)
 
@@ -86,7 +87,7 @@ def register():
 # 🔁 REDIRECT TO LOGIN
 @main.route('/')
 def index():
-    return redirect(url_for('main.login'))
+    return render_template('landing.html')
 
 # 📅 SERVICE SCHEDULING
 @main.route('/schedule', methods=['GET', 'POST'])
@@ -344,3 +345,93 @@ def history():
         return redirect(url_for('main.login'))
 
     return render_template('history.html', services=services)
+
+@main.route('/about')
+def about():
+    return render_template('about.html')
+
+@main.route('/terms')
+def terms():
+    return render_template('terms.html')
+
+@main.route('/privacy')
+def privacy():
+    return render_template('privacy.html')
+
+@main.route('/review/<int:service_id>', methods=['GET', 'POST'])
+@login_required
+def review(service_id):
+    service = Service.query.get(service_id)
+
+    if not service or service.client_id != current_user.id:
+        flash("Access denied.")
+        return redirect(url_for('main.dashboard_client'))
+
+    if request.method == 'POST':
+        rating = int(request.form['rating'])
+        comment = request.form.get('comment')
+
+        new_review = Review(
+            rating=rating,
+            comment=comment,
+            service_id=service.id,
+            client_id=current_user.id,
+            professional_id=service.professional_id
+        )
+
+        db.session.add(new_review)
+        db.session.commit()
+
+        flash("Review submitted successfully.")
+        return redirect(url_for('main.dashboard_client'))
+
+    return render_template("review_service.html", service=service)
+# professional rewies
+@main.route('/reviews')
+@login_required
+def reviews():
+    if current_user.role != 'Professional':
+        flash("Access denied.")
+        return redirect(url_for('main.login'))
+
+    reviews = Review.query.filter_by(professional_id=current_user.id).all()
+    return render_template('review_list.html', reviews=reviews)
+
+@main.route('/submit_review/<int:service_id>', methods=['GET', 'POST'])
+@login_required
+def submit_review(service_id):
+    if current_user.role != 'Client':
+        flash("Access denied.")
+        return redirect(url_for('main.login'))
+
+    service = Service.query.get_or_404(service_id)
+
+    if service.client_id != current_user.id:
+        flash("This service does not belong to you.")
+        return redirect(url_for('main.dashboard_client'))
+
+    existing_review = Review.query.filter_by(service_id=service.id).first()
+    if existing_review:
+        flash("You have already reviewed this service.")
+        return redirect(url_for('main.dashboard_client'))
+
+    if request.method == 'POST':
+        rating = int(request.form['rating'])
+        comment = request.form['comment']
+        professional = User.query.filter_by(role='Professional').first()  # Idealmente, você deveria usar service.professional_id
+
+        new_review = Review(
+            rating=rating,
+            comment=comment,
+            service_id=service.id,
+            client_id=current_user.id,
+            professional_id=professional.id
+        )
+
+        db.session.add(new_review)
+        db.session.commit()
+
+        flash("Review submitted successfully.")
+        return redirect(url_for('main.dashboard_client'))
+
+    return render_template('submit_review.html', service=service)
