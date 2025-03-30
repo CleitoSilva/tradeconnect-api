@@ -1,31 +1,40 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Schedule a New Service</h2>
+<h2>🛠 Schedule a New Service</h2>
 
 <form method="POST">
-    <input class="form-control mb-2" name="description" placeholder="Service description" required>
+    <input class="form-control mb-2" name="description" placeholder="Service Description" required>
     <input class="form-control mb-2" name="date" type="date" required>
     <input class="form-control mb-2" name="time" type="time" required>
 
-    <div class="mb-3">
-        <label for="address" class="form-label">Endereço</label>
-        <input type="text" id="address" name="address" class="form-control" required>
-    </div>
+    <!-- 📍 Address input with Google Autocomplete -->
+    <input class="form-control mb-2" id="address" name="address" placeholder="Service Address" required>
 
-    <button class="btn btn-success">Schedule</button>
+    <!-- 🛰 Hidden fields for coordinates -->
+    <input type="hidden" id="latitude" name="latitude">
+    <input type="hidden" id="longitude" name="longitude">
+
+    <button class="btn btn-primary">Schedule</button>
 </form>
 
-<a href="{{ url_for('main.dashboard_client') }}" class="btn btn-secondary mt-3">Back</a>
-
-<!-- Google Maps Places API -->
+<!-- 🔌 Google Maps Autocomplete -->
 <script
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA_UgIgFy5bB54bri3nNL_HEbWaHBCCKlg&libraries=places&callback=initAutocomplete"
-  async defer
-></script>
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVoEt5W58vz-76LWwftrIHww4FBnvGVmo&libraries=places&callback=initAutocomplete"
+  async defer>
+</script>
+
 <script>
   function initAutocomplete() {
     const input = document.getElementById("address");
-    new google.maps.places.Autocomplete(input);
+    const autocomplete = new google.maps.places.Autocomplete(input);
+
+    autocomplete.addListener("place_changed", function () {
+      const place = autocomplete.getPlace();
+      if (place.geometry) {
+        document.getElementById("latitude").value = place.geometry.location.lat();
+        document.getElementById("longitude").value = place.geometry.location.lng();
+      }
+    });
   }
 </script>
 {% endblock %}

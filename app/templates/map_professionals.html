@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>🗺 Profissionais no mapa</h2>
+<h2>🗺 Professionals on the Map</h2>
 
 <div id="map" style="height: 500px;" class="mb-3"></div>
 
-<a href="{{ url_for('main.dashboard_client') }}" class="btn btn-secondary">Voltar</a>
+<a href="{{ url_for('main.dashboard_client') }}" class="btn btn-secondary">Back</a>
 
 <script>
   function initMap() {
@@ -13,9 +13,11 @@
       center: { lat: 53.3498, lng: -6.2603 } // Dublin
     });
 
-    const professionalsData = JSON.parse('{{ professionals_json | safe }}');
+    const professionalsData = JSON.parse('{{ professionals_json | tojson | safe }}');
 
-    professionalsData.forEach(function(prof) {
+    for (let i = 0; i < professionalsData.length; i++) {
+      const prof = professionalsData[i];
+
       if (prof.latitude && prof.longitude) {
         new google.maps.Marker({
           position: { lat: prof.latitude, lng: prof.longitude },
@@ -23,7 +25,7 @@
           title: prof.username
         });
       }
-    });
+    }
   }
 </script>
 

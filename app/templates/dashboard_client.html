@@ -2,32 +2,38 @@
 {% block content %}
 <h2>Welcome, {{ user.username }} (Client)</h2>
 
+<!-- 🛠 Schedule new service -->
 <a href="{{ url_for('main.schedule_service') }}" class="btn btn-primary mb-3">Schedule New Service</a>
 
+<!-- 🗺 View professionals on the map -->
+<a href="{{ url_for('main.map_professionals') }}" class="btn btn-outline-success mb-4">View Professionals on Map</a>
+
 {% if services %}
-    <h4>Your Scheduled Services:</h4>
-    <ul class="list-group">
-        {% for service in services %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-                <strong>{{ service.description }}</strong><br>
-                {{ service.date }} at {{ service.time }}
-            </div>
-            <div>
-                {% if service.status == 'Accepted' %}
-                    <span class="badge bg-success">Accepted</span>
-                {% elif service.status == 'Rejected' %}
-                    <span class="badge bg-danger">Rejected</span>
-                {% else %}
-                    <span class="badge bg-warning text-dark">Pending</span>
-                {% endif %}
-            </div>
-        </li>
-        {% endfor %}
-    </ul>
+  <h4>Your Scheduled Services:</h4>
+  <ul class="list-group">
+    {% for service in services %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <strong>{{ service.description }}</strong><br>
+          {{ service.date }} at {{ service.time }}<br>
+          📍 {{ service.address }}
+        </div>
+        <div>
+          {% if service.status == 'Accepted' %}
+            <span class="badge bg-success">Accepted</span>
+          {% elif service.status == 'Rejected' %}
+            <span class="badge bg-danger">Rejected</span>
+          {% else %}
+            <span class="badge bg-warning text-dark">Pending</span>
+          {% endif %}
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
 {% else %}
-    <p>You have no services scheduled.</p>
+  <p>You have no services scheduled.</p>
 {% endif %}
 
+<!-- 🚪 Logout -->
 <a href="{{ url_for('main.logout') }}" class="btn btn-danger mt-4">Logout</a>
 {% endblock %}

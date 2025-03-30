@@ -37,6 +37,8 @@ class Service(db.Model):
     client_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
    
     address = db.Column(db.String(255), nullable=True)
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float) 
 
 
 # 🧾 Log model

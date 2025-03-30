@@ -78,7 +78,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-        flash("Conta criada com sucesso! Faça o login.")
+        flash("Account created successfully! Please log in.")  # 🔁 Alterado para inglês
         return redirect(url_for('main.login'))
 
     return render_template('register.html')
@@ -99,20 +99,24 @@ def schedule_service():
         description = request.form['description']
         date = request.form['date']
         time = request.form['time']
-        address = request.form['address']  # ✅ pega o endereço
+        address = request.form['address']
+        latitude = request.form.get('latitude')  # 🧭 PEGA COORDENADAS DO FORM
+        longitude = request.form.get('longitude')
 
         new_service = Service(
             description=description,
             date=date,
             time=time,
-            address=address,  # ✅ salva no banco
+            address=address,
+            latitude=latitude if latitude else None,
+            longitude=longitude if longitude else None,
             client_id=current_user.id
         )
 
         db.session.add(new_service)
         db.session.commit()
 
-        # 🔔 Notifica os profissionais ativos
+        # 🔔 Notifica os profissionais
         professionals = User.query.filter_by(role='Professional', is_active=True).all()
         for prof in professionals:
             notification = Notification(
@@ -121,8 +125,8 @@ def schedule_service():
             )
             db.session.add(notification)
 
-        # 📝 Log
-        log = Log(action=f"{current_user.username} scheduled a service at {address} on {date} {time}")
+        # 📝 Log único (✔️ corrigido)
+        log = Log(action=f"{current_user.username} scheduled a service at {address} on {date} at {time}")
         db.session.add(log)
 
         db.session.commit()
@@ -253,18 +257,21 @@ def mark_notifications_read():
     flash("All notifications marked as read.")
     return redirect(url_for('main.dashboard_professional'))
 
+# Profile
+# 🔧 EDIT PROFILE
 @main.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
-    if current_user.role != 'Professional':
-        flash("Acesso negado.")
-        return redirect(url_for('main.dashboard_professional'))
+    # Allow both Client and Professional roles
+    if current_user.role not in ['Client', 'Professional']:
+        flash("Access denied.")
+        return redirect(url_for('main.login'))
 
     if request.method == 'POST':
         address = request.form['address']
         current_user.address = address
 
-        # 🗺 Obtem coordenadas via API do Google Maps
+        # 🌍 Get coordinates using Google Maps API
         api_key = 'AIzaSyBVoEt5W58vz-76LWwftrIHww4FBnvGVmo'
         geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={api_key}"
         response = requests.get(geocode_url).json()
@@ -274,9 +281,9 @@ def edit_profile():
             current_user.latitude = location['lat']
             current_user.longitude = location['lng']
             db.session.commit()
-            flash("Endereço salvo com sucesso!")
+            flash("Location updated successfully!")
         else:
-            flash("Erro ao localizar o endereço. Verifique e tente novamente.")
+            flash("Could not find location. Please check the address.")
 
     return render_template('edit_profile.html', user=current_user)
 
@@ -296,3 +303,44 @@ def map_professionals():
     ])
 
     return render_template("map_professionals.html", professionals_json=professionals_json)
+
+@main.route('/map_services')
+@login_required
+def map_services():
+    if current_user.role not in ['Professional', 'Client']:
+        return redirect(url_for('main.dashboard_client'))
+
+    services = Service.query.filter(
+        Service.latitude.isnot(None), 
+        Service.longitude.isnot(None)
+    ).all()
+
+    services_json = json.dumps([
+        {
+            "id": s.id,
+            "description": s.description,
+            "date": s.date,
+            "time": s.time,
+            "address": s.address,
+            "latitude": s.latitude,
+            "longitude": s.longitude
+        }
+        for s in services
+    ])
+
+    return render_template("map_services.html", services_json=services_json)
+
+
+# History
+@main.route('/history')
+@login_required
+def history():
+    if current_user.role == 'Client':
+        services = Service.query.filter_by(client_id=current_user.id).order_by(Service.date.desc()).all()
+    elif current_user.role == 'Professional':
+        services = Service.query.order_by(Service.date.desc()).all()
+    else:
+        flash("Access denied.")
+        return redirect(url_for('main.login'))
+
+    return render_template('history.html', services=services)

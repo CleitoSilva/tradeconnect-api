@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>📜 Service History</h2>
+
+{% if services %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+            <th>Address</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in services %}
+        <tr>
+            <td>{{ s.description }}</td>
+            <td>{{ s.date }}</td>
+            <td>{{ s.time }}</td>
+            <td>{{ s.status }}</td>
+            <td>{{ s.address }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+    <p>No service history to display.</p>
+{% endif %}
+{% endblock %}
