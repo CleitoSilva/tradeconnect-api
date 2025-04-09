@@ -10,10 +10,19 @@ def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'segredo123'
 
-    # 👉 Usa SQLite para deploy (mantém compatível com SQL)
-    basedir = os.path.abspath(os.path.dirname(__file__))
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
-    
+    # ✅ Usa PostgreSQL se DATABASE_URL estiver definido (Render)
+    database_url = os.getenv("DATABASE_URL")
+
+    if database_url:
+        # Corrige se vier sem driver
+        if database_url.startswith("postgres://"):
+            database_url = database_url.replace("postgres://", "postgresql+psycopg2://", 1)
+        app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    else:
+        # Fallback local (SQLite)
+        basedir = os.path.abspath(os.path.dirname(__file__))
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
+
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)

@@ -1,21 +1,29 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>📝 Reviews Received</h2>
+<div class="container">
+    <h2 class="mb-4">⭐ Reviews Received</h2>
 
-{% if reviews %}
-  <ul class="list-group">
-    {% for review in reviews %}
-    <li class="list-group-item">
-      <strong>Rating:</strong> {{ review.rating }} / 5<br>
-      <strong>Comment:</strong> {{ review.comment }}<br>
-      <strong>From Client:</strong> {{ review.client_review.username }}<br>
-      <strong>For Service:</strong> {{ review.service.description }}
-    </li>
-    {% endfor %}
-  </ul>
-{% else %}
-  <p>No reviews received yet.</p>
-{% endif %}
+    {% if reviews %}
+    <div class="row">
+        {% for review in reviews %}
+        <div class="col-md-6">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">From {{ review.client_review.username }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">For: {{ review.service.description }}</h6>
+                    <p class="card-text"><strong>Rating:</strong> {{ review.rating }} / 5</p>
+                    <p class="card-text"><strong>Comment:</strong> {{ review.comment }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">You haven't received any reviews yet.</div>
+    {% endif %}
 
-<a href="{{ url_for('main.dashboard_professional') }}" class="btn btn-secondary mt-3">Back</a>
+    <a href="{{ url_for('main.dashboard_professional') }}" class="btn btn-secondary mt-4">
+        <i class="bi bi-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
 {% endblock %}

@@ -3,7 +3,22 @@
 <h2>🛠 Schedule a New Service</h2>
 
 <form method="POST">
-    <input class="form-control mb-2" name="description" placeholder="Service Description" required>
+    <!-- 👷 Service Type Dropdown -->
+    <label for="description" class="form-label">Select Service Type:</label>
+    <select id="description" name="description" class="form-select mb-2" onchange="toggleCustomField()" required>
+        <option value="">-- Select --</option>
+        <option value="Plumber">Plumber</option>
+        <option value="Electrician">Electrician</option>
+        <option value="Painter">Painter</option>
+        <option value="Handyman">Handyman</option>
+        <option value="Carpenter">Carpenter</option>
+        <option value="Roofer">Roofer</option>
+        <option value="Other">Other</option>
+    </select>
+
+    <!-- ✍️ Custom Description -->
+    <input type="text" id="custom_description" name="custom_description" class="form-control mb-2" placeholder="Describe the service..." style="display: none;">
+
     <input class="form-control mb-2" name="date" type="date" required>
     <input class="form-control mb-2" name="time" type="time" required>
 
@@ -18,23 +33,35 @@
 </form>
 
 <!-- 🔌 Google Maps Autocomplete -->
-<script
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVoEt5W58vz-76LWwftrIHww4FBnvGVmo&libraries=places&callback=initAutocomplete"
-  async defer>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVoEt5W58vz-76LWwftrIHww4FBnvGVmo&libraries=places&callback=initAutocomplete"
+        async defer>
 </script>
 
 <script>
-  function initAutocomplete() {
-    const input = document.getElementById("address");
-    const autocomplete = new google.maps.places.Autocomplete(input);
+    function initAutocomplete() {
+        const input = document.getElementById("address");
+        const autocomplete = new google.maps.places.Autocomplete(input);
 
-    autocomplete.addListener("place_changed", function () {
-      const place = autocomplete.getPlace();
-      if (place.geometry) {
-        document.getElementById("latitude").value = place.geometry.location.lat();
-        document.getElementById("longitude").value = place.geometry.location.lng();
-      }
-    });
-  }
+        autocomplete.addListener("place_changed", function () {
+            const place = autocomplete.getPlace();
+            if (place.geometry) {
+                document.getElementById("latitude").value = place.geometry.location.lat();
+                document.getElementById("longitude").value = place.geometry.location.lng();
+            }
+        });
+    }
+
+    function toggleCustomField() {
+        const select = document.getElementById("description");
+        const custom = document.getElementById("custom_description");
+
+        if (select.value === "Other") {
+            custom.style.display = "block";
+            custom.required = true;
+        } else {
+            custom.style.display = "none";
+            custom.required = false;
+        }
+    }
 </script>
 {% endblock %}

@@ -11,56 +11,109 @@
             margin: 0;
             padding: 0;
             display: flex;
+            flex-direction: row;
             height: 100vh;
         }
+
         .sidebar {
             width: 220px;
-            background-color: #0d6efd;
-            color: #fff;
             padding: 20px;
+            flex-shrink: 0;
+            color: #fff;
         }
-        .sidebar h4 {
-            color: white;
-            font-weight: bold;
-            margin-bottom: 30px;
-        }
-        .sidebar a {
-            display: block;
-            color: white;
-            text-decoration: none;
-            margin: 15px 0;
-        }
-        .sidebar a:hover {
-            text-decoration: underline;
-        }
-        .sidebar i {
-            margin-right: 8px;
-        }
+
         .content {
             flex: 1;
             padding: 30px;
             background-color: #f8f9fa;
             overflow-y: auto;
         }
+
+        .sidebar a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            margin: 15px 0;
+            transition: all 0.2s ease;
+        }
+
+            .sidebar a:hover {
+                text-decoration: none;
+                transform: translateX(4px);
+                color: #ffc107;
+            }
+
+        .sidebar h4 {
+            color: white;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .sidebar i {
+            margin-right: 8px;
+        }
+
+        /* Custom colors */
+        .client-bg {
+            background-color: #0d6efd;
+        }
+        /* Blue */
+        .tradesman-bg {
+            background-color: #198754;
+        }
+        /* Green */
+        .admin-bg {
+            background-color: #6f42c1;
+        }
+        /* Purple */
     </style>
 </head>
 <body>
-    <div class="sidebar">
+
+    <div class="sidebar
+        {% if current_user.role == 'Client' %}client-bg
+        {% elif current_user.role == 'Professional' %}tradesman-bg
+        {% elif current_user.role == 'Admin' %}admin-bg
+        {% endif %}">
+
         <h4>TradeConnect</h4>
+
+        {% if current_user.role == 'Client' %}
         <a href="{{ url_for('main.edit_profile') }}"><i class="bi bi-gear"></i> Settings</a>
         <a href="{{ url_for('main.schedule_service') }}"><i class="bi bi-clipboard"></i> Schedule</a>
         <a href="{{ url_for('main.history') }}"><i class="bi bi-clock-history"></i> History</a>
         <a href="{{ url_for('main.map_services') }}"><i class="bi bi-map"></i> Map</a>
+        <a href="{{ url_for('main.view_professionals') }}"><i class="bi bi-people"></i> Professionals</a>
         <a href="{{ url_for('main.logout') }}"><i class="bi bi-box-arrow-left"></i> Logout</a>
+
+        {% elif current_user.role == 'Professional' %}
+        <a href="{{ url_for('main.edit_profile') }}"><i class="bi bi-gear"></i> Settings</a>
+        <a href="{{ url_for('main.history') }}"><i class="bi bi-clock-history"></i> History</a>
+        <a href="{{ url_for('main.map_services') }}"><i class="bi bi-map"></i> Map</a>
+        <a href="{{ url_for('main.reviews') }}"><i class="bi bi-bell"></i> Notifications</a>
+        <a href="{{ url_for('main.logout') }}"><i class="bi bi-box-arrow-left"></i> Logout</a>
+
+        {% elif current_user.role == 'Admin' %}
+        <a href="{{ url_for('main.admin_dashboard') }}"><i class="bi bi-speedometer"></i> Dashboard</a>
+        <a href="{{ url_for('main.admin_dashboard') }}"><i class="bi bi-people"></i> Users</a>
+        <a href="{{ url_for('main.admin_logs') }}"><i class="bi bi-journal-text"></i> Logs</a>
+        <a href="{{ url_for('main.logout') }}"><i class="bi bi-box-arrow-left"></i> Logout</a>
+        {% endif %}
     </div>
 
     <div class="content">
         {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <div class="alert alert-warning">{{ messages[0] }}</div>
-            {% endif %}
+        {% if messages %}
+        <div class="alert alert-info">
+            {% for message in messages %}
+            <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
         {% endwith %}
+
         {% block content %}{% endblock %}
     </div>
+
 </body>
 </html>

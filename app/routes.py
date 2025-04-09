@@ -64,8 +64,17 @@ def register():
         latitude = request.form.get('latitude')
         longitude = request.form.get('longitude')
 
+        # 🔐 Hash password
         hashed_password = generate_password_hash(password)
 
+        # 📌 Specialty (only for Tradesman)
+        specialty = None
+        if role == 'Tradesman':
+            specialty = request.form.get('specialty')
+            if specialty == 'Other':
+                specialty = request.form.get('custom_specialty')
+
+        # 👤 Create user
         new_user = User(
             username=username,
             email=email,
@@ -73,16 +82,21 @@ def register():
             role=role,
             address=address,
             latitude=latitude if latitude else None,
-            longitude=longitude if longitude else None
+            longitude=longitude if longitude else None,
+            specialty=specialty
         )
 
         db.session.add(new_user)
         db.session.commit()
 
-        flash("Account created successfully! Please log in.")  # 🔁 Alterado para inglês
+        if role == 'Tradesman':
+            print(f"✔️ New tradesman registered: {username} - {specialty}")
+
+        flash("Account created successfully! Please log in.")
         return redirect(url_for('main.login'))
 
     return render_template('register.html')
+
 
 # 🔁 REDIRECT TO LOGIN
 @main.route('/')
@@ -98,10 +112,13 @@ def schedule_service():
 
     if request.method == 'POST':
         description = request.form['description']
+        if description == 'Other':
+            description = request.form.get('custom_description')
+
         date = request.form['date']
         time = request.form['time']
         address = request.form['address']
-        latitude = request.form.get('latitude')  # 🧭 PEGA COORDENADAS DO FORM
+        latitude = request.form.get('latitude') 
         longitude = request.form.get('longitude')
 
         new_service = Service(
@@ -154,7 +171,7 @@ def dashboard_professional():
     if current_user.role != 'Professional':
         return redirect(url_for('main.login'))
 
-    services = Service.query.filter_by(status='Pending').all()
+    services = Service.query.filter_by(professional_id=current_user.id).order_by(Service.date.desc()).all()
 
     # 🔔 Get unread notifications
     notifications = Notification.query.filter_by(user_id=current_user.id, is_read=False).all()
@@ -203,7 +220,7 @@ def admin_dashboard():
         return redirect(url_for('main.login'))
 
     users = User.query.all()
-    return render_template('admin_dashboard.html', users=users)
+    return render_template('admin_dashboard.html', users=users, user=current_user)
 
 # 🔁 TOGGLE ACTIVE STATUS
 @main.route('/toggle_status/<int:user_id>')
@@ -386,6 +403,8 @@ def review(service_id):
         return redirect(url_for('main.dashboard_client'))
 
     return render_template("review_service.html", service=service)
+
+
 # professional rewies
 @main.route('/reviews')
 @login_required
@@ -435,3 +454,80 @@ def submit_review(service_id):
         return redirect(url_for('main.dashboard_client'))
 
     return render_template('submit_review.html', service=service)
+
+# 🧑‍🔧 Public list of professionals with profile info
+@main.route('/professionals')
+def list_professionals():
+    professionals = User.query.filter_by(role='Professional').all()
+    data = []
+    for pro in professionals:
+        if pro.public_profile:
+            data.append({
+                'id': pro.id,
+                'name': pro.public_profile.full_name,
+                'specialty': pro.public_profile.specialty,
+                'location': pro.public_profile.location,
+                'photo': pro.public_profile.photo_url,
+                'bio': pro.public_profile.bio,
+                'contact': pro.public_profile.contact_info
+            })
+    return jsonify(data)
+
+
+
+
+# 🌐 Visual page listing all professionals
+@main.route('/professionals/view')
+def view_professionals():
+    professionals = User.query.filter_by(role='Professional').all()
+    return render_template('professionals.html', professionals=professionals)
+
+# 👤 Individual profile page for a professional
+@main.route('/professional/<int:user_id>')
+def view_professional(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.role != 'Professional' or not user.public_profile:
+        return "Profile not found", 404
+    return render_template('professional_detail.html', user=user)
+
+# 📅 Schedule service with specific professional
+@main.route('/schedule/<int:professional_id>', methods=['GET', 'POST'])
+@login_required
+def schedule_with_professional(professional_id):
+    professional = User.query.get_or_404(professional_id)
+
+    if current_user.role != 'Client':
+        flash("Only clients can schedule services.")
+        return redirect(url_for('main.index'))
+
+    if request.method == 'POST':
+        description = request.form['description']
+        date = request.form['date']
+        time = request.form['time']
+        address = request.form['address']
+
+        new_service = Service(
+            description=description,
+            date=date,
+            time=time,
+            address=address,
+            client_id=current_user.id,
+            professional_id=professional.id
+        )
+
+        db.session.add(new_service)
+        db.session.commit()
+        flash("Service scheduled with professional!")
+        return redirect(url_for('main.dashboard_client'))
+
+    return render_template('schedule_form.html', professional=professional)
+
+
+
+    # 💳 Test PayPal Page
+@main.route('/paypal_test')
+@login_required
+def paypal_test():
+    return render_template('paypal_test.html')
+
+

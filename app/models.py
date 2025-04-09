@@ -4,7 +4,7 @@ from . import db
 
 # 🧑 User model
 class User(UserMixin, db.Model):
-    __tablename__ = 'users'  # ESSENCIAL! Esse nome precisa bater com os ForeignKeys
+    __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), nullable=False)
@@ -15,13 +15,15 @@ class User(UserMixin, db.Model):
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
     is_active = db.Column(db.Boolean, default=True)
+    specialty = db.Column(db.String(120))
 
-    # Relationships
-    services = db.relationship('Service', backref='client', lazy=True)
+
+    # 🔗 Relationships
+    services_as_professional = db.relationship('Service', foreign_keys='Service.professional_id', backref='professional', lazy=True)
     notifications = db.relationship('Notification', backref='user', lazy=True)
     reviews_written = db.relationship('Review', foreign_keys='Review.client_id', backref='client_review')
     reviews_received = db.relationship('Review', foreign_keys='Review.professional_id', backref='professional_review')
-
+    public_profile = db.relationship('ProfessionalProfile', backref='user', uselist=False)
 
 # 📅 Service model
 class Service(db.Model):
@@ -37,7 +39,7 @@ class Service(db.Model):
     longitude = db.Column(db.Float)
 
     client_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-
+    professional_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
 # 📝 Review model
 class Review(db.Model):
@@ -53,7 +55,6 @@ class Review(db.Model):
 
     service = db.relationship('Service', backref='review')
 
-
 # 🔔 Notification model
 class Notification(db.Model):
     __tablename__ = 'notifications'
@@ -63,7 +64,6 @@ class Notification(db.Model):
     message = db.Column(db.String(255), nullable=False)
     is_read = db.Column(db.Boolean, default=False)
 
-
 # 🧾 Log model
 class Log(db.Model):
     __tablename__ = 'logs'
@@ -71,3 +71,18 @@ class Log(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     action = db.Column(db.String(255), nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+# 👨‍🔧 Professional public profile
+class ProfessionalProfile(db.Model):
+    __tablename__ = 'professional_profiles'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
+
+    full_name = db.Column(db.String(100), nullable=False)
+    photo_url = db.Column(db.String(255))
+    bio = db.Column(db.Text)
+    specialty = db.Column(db.String(100))
+    location = db.Column(db.String(150))
+    contact_info = db.Column(db.String(150))
+

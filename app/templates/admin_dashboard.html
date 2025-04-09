@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Admin Dashboard</h2>
+<h2>🛡️ Welcome, {{ user.username }} (Admin)</h2>
 
-<table class="table table-bordered">
+<table class="table table-bordered mt-4">
     <thead class="table-light">
         <tr>
             <th>Username</th>
             <th>Email</th>
             <th>Role</th>
             <th>Status</th>
-            <th>Ação</th>
+            <th>Action</th>
         </tr>
     </thead>
     <tbody>
@@ -20,9 +20,9 @@
             <td>{{ user.role }}</td>
             <td>
                 {% if user.is_active %}
-                    <span class="badge bg-success">Active</span>
+                <span class="badge bg-success">Active</span>
                 {% else %}
-                    <span class="badge bg-secondary">Inactive</span>
+                <span class="badge bg-secondary">Inactive</span>
                 {% endif %}
             </td>
             <td>
@@ -35,5 +35,5 @@
     </tbody>
 </table>
 
-<a href="{{ url_for('main.logout') }}" class="btn btn-danger mt-3">Logout</a>
+<a href="{{ url_for('main.logout') }}" class="btn btn-danger mt-4">Logout</a>
 {% endblock %}

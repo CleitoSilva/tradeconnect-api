@@ -1,54 +1,59 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Welcome, {{ user.username }} (Professional)</h2>
+<h2>👷 Welcome, {{ user.username }} (Tradesman)</h2>
 
-<!-- 🔘 Show Services on Map Button -->
-<a href="{{ url_for('main.map_services') }}" class="btn btn-primary mb-3">Show Services on Map</a>
+<a href="{{ url_for('main.map_services') }}" class="btn btn-outline-primary mb-3">Show Services on Map</a>
 
 {% if notifications %}
-    <h4>📬 Unread Notifications:</h4>
-    <ul class="list-group mb-4">
-        {% for note in notifications %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            {{ note.message }}
-            <a href="{{ url_for('main.mark_notification_read', notification_id=note.id) }}" class="btn btn-sm btn-outline-success">Mark as Read</a>
-        </li>
-        {% endfor %}
-    </ul>
+<h4>📬 Unread Notifications:</h4>
+<ul class="list-group mb-4">
+    {% for note in notifications %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ note.message }}
+        <a href="{{ url_for('main.mark_notification_read', notification_id=note.id) }}"
+           class="btn btn-sm btn-outline-success">Mark as Read</a>
+    </li>
+    {% endfor %}
+</ul>
 {% endif %}
 
 {% if services %}
-    <h4>📋 Pending Services:</h4>
-    <ul class="list-group">
-        {% for service in services %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-                <strong>{{ service.description }}</strong><br>
-                {{ service.date }} at {{ service.time }}<br>
-                {{ service.address }}
-            </div>
-            <div>
-                <a href="{{ url_for('main.update_status', service_id=service.id, new_status='Accepted') }}" class="btn btn-success btn-sm">Accept</a>
-                <a href="{{ url_for('main.update_status', service_id=service.id, new_status='Rejected') }}" class="btn btn-danger btn-sm">Reject</a>
-            </div>
-        </li>
-        {% endfor %}
-    </ul>
+<h4>📋 Scheduled Services:</h4>
+<ul class="list-group">
+    {% for service in services %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+            <strong>{{ service.description }}</strong><br>
+            {{ service.date }} at {{ service.time }}<br>
+            {{ service.address }}<br>
+            <strong>Status:</strong> {{ service.status }}
+        </div>
+        {% if service.status == 'Pending' %}
+        <div>
+            <a href="{{ url_for('main.update_status', service_id=service.id, new_status='Accepted') }}"
+               class="btn btn-success btn-sm">Accept</a>
+            <a href="{{ url_for('main.update_status', service_id=service.id, new_status='Rejected') }}"
+               class="btn btn-danger btn-sm">Reject</a>
+        </div>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
 {% else %}
-    <p>No pending services.</p>
+<p>No scheduled services found.</p>
 {% endif %}
+
+<h4 class="mt-4">⭐ Client Reviews</h4>
+<ul class="list-group">
+    {% for review in user.reviews_received %}
+    <li class="list-group-item">
+        <strong>Rating:</strong> {{ review.rating }}<br>
+        <strong>Comment:</strong> {{ review.comment }}
+    </li>
+    {% else %}
+    <li class="list-group-item">No reviews yet.</li>
+    {% endfor %}
+</ul>
 
 <a href="{{ url_for('main.logout') }}" class="btn btn-danger mt-4">Logout</a>
 {% endblock %}
-
-<a href="{{ url_for('main.map_services') }}" class="btn btn-outline-primary mb-4">Show Services on Map</a>
-
-<h3>⭐ Client Reviews</h3>
-<ul>
-  {% for review in current_user.reviews_received %}
-    <li><strong>Rating:</strong> {{ review.rating }}<br>
-        <strong>Comment:</strong> {{ review.comment }}</li>
-  {% else %}
-    <li>No reviews yet.</li>
-  {% endfor %}
-</ul>
