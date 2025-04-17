@@ -1,20 +1,23 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>list of Profissionals</h2>
+<h2 class="mb-4">List of Professionals</h2>
 
 {% if professionals %}
 <ul class="list-group">
     {% for user in professionals %}
-    <li class="list-group-item">
-        <img src="{{ user.photo }}" width="40" height="40" class="rounded-circle me-2">
-        <strong>{{ user.username }}</strong> — {{ user.specialty }}<br>
-        <small>{{ user.address }}</small>
+    <li class="list-group-item d-flex align-items-center">
+        <img src="https://ui-avatars.com/api/?name={{ user.username|urlencode }}&background=random&bold=true" width="50" height="50" class="rounded-circle me-3 shadow-sm">
+        <div>
+            <h5 class="mb-0">{{ user.username }}</h5>
+            <small class="text-muted">{{ user.specialty }}</small><br>
+            <small>{{ user.address }}</small>
+        </div>
     </li>
     {% endfor %}
 </ul>
 {% else %}
-<p>No profissionals.</p>
+<p class="text-muted">No professionals available.</p>
 {% endif %}
 
 {% endblock %}

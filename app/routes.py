@@ -127,24 +127,25 @@ def schedule_service():
     if current_user.role != 'Client':
         return redirect(url_for('main.dashboard_client'))
 
-    professionals = User.query.filter_by(role='Professional', is_active=True).all()
-
     if request.method == 'POST':
+        description = request.form.get('custom_description') or request.form.get('description')
+
         service = Service(
-            description=request.form['description'],
+            description=description,
             date=request.form['date'],
             time=request.form['time'],
             address=request.form['address'],
             latitude=request.form.get('latitude'),
             longitude=request.form.get('longitude'),
-            client_id=current_user.id,
+            client_id=current_user.id
         )
+
         db.session.add(service)
         db.session.commit()
-        flash('Serviço agendado com sucesso!')
+        flash('Service successfully scheduled!')
         return redirect(url_for('main.dashboard_client'))
 
-    return render_template('schedule_service.html', professionals=professionals)
+    return render_template('schedule_service.html')
 
 # REVIEWS
 @main.route('/submit_review/<int:service_id>', methods=['GET', 'POST'])
@@ -334,3 +335,33 @@ def setup_forcado():
 
     db.session.commit()
     return "✅ Tabelas criadas e usuários inseridos!"
+
+@main.route('/add-fake-professionals')
+def add_fake_professionals():
+    from .models import User
+    from werkzeug.security import generate_password_hash
+    from . import db
+
+    fake_users = [
+        {"username": "John Electrician", "email": "john@fake.com", "specialty": "Electrician"},
+        {"username": "Mary Plumber", "email": "mary@fake.com", "specialty": "Plumber"},
+        {"username": "Carlos Painter", "email": "carlos@fake.com", "specialty": "Painter"},
+        {"username": "Anna Carpenter", "email": "anna@fake.com", "specialty": "Carpenter"},
+        {"username": "Rafael IT Tech", "email": "rafael@fake.com", "specialty": "IT Technician"},
+    ]
+
+    for u in fake_users:
+        if not User.query.filter_by(email=u["email"]).first():
+            user = User(
+                username=u["username"],
+                email=u["email"],
+                password=generate_password_hash("Test1234"),
+                role="Professional",
+                specialty=u["specialty"],
+                address="Fake Street, City",
+                is_active=True
+            )
+            db.session.add(user)
+
+    db.session.commit()
+    return "✅ Fake professionals added successfully!"

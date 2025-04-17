@@ -3,13 +3,26 @@
 <h2>🛠 Schedule a New Service</h2>
 
 <form method="POST">
-    <input class="form-control mb-2" name="description" placeholder="Service Description" required>
+
+    <!-- 🔧 Service Description -->
+    <label class="form-label">Service Description</label>
+    <select id="service_select" name="description" class="form-select mb-2" onchange="toggleCustomInput()" required>
+        <option value="">Select a service</option>
+        <option value="Electrician">Electrician</option>
+        <option value="Plumber">Plumber</option>
+        <option value="Painter">Painter</option>
+        <option value="Carpenter">Carpenter</option>
+        <option value="IT Technician">IT Technician</option>
+        <option value="Other">Other (write below)</option>
+    </select>
+
+    <input type="text" id="custom_service" name="custom_description" class="form-control mb-2" placeholder="Type the service..." style="display: none;">
+
     <input class="form-control mb-2" name="date" type="date" required>
     <input class="form-control mb-2" name="time" type="time" required>
 
     <!-- 📍 Address input with Google Autocomplete -->
     <input class="form-control mb-2" id="address" name="address" placeholder="Service Address" required>
-
 
     <!-- 🛰 Hidden fields for coordinates -->
     <input type="hidden" id="latitude" name="latitude">
@@ -35,6 +48,19 @@
                 document.getElementById("longitude").value = place.geometry.location.lng();
             }
         });
+    }
+
+    function toggleCustomInput() {
+        const select = document.getElementById("service_select");
+        const input = document.getElementById("custom_service");
+
+        if (select.value === "Other") {
+            input.style.display = "block";
+            input.required = true;
+        } else {
+            input.style.display = "none";
+            input.required = false;
+        }
     }
 </script>
 {% endblock %}
