@@ -284,7 +284,9 @@ def update_status(service_id, new_status):
 
     return redirect(url_for('main.dashboard_professional'))
 
-@main.route('/professionals')
-def professionals_list():
-    professionals = User.query.filter_by(role='Professional', is_active=True).all()
-    return render_template('professionals_list.html', professionals=professionals)
+@main.route('/view_professionals')
+@login_required
+def view_professionals():
+    from .models import User
+    professionals = User.query.filter_by(role="Professional").all()
+    return render_template('view_professionals.html', professionals=professionals)
