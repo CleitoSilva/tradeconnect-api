@@ -138,7 +138,6 @@ def schedule_service():
             latitude=request.form.get('latitude'),
             longitude=request.form.get('longitude'),
             client_id=current_user.id,
-            professional_id=request.form.get('professional_id')
         )
         db.session.add(service)
         db.session.commit()
@@ -290,3 +289,48 @@ def view_professionals():
     from .models import User
     professionals = User.query.filter_by(role="Professional").all()
     return render_template('view_professionals.html', professionals=professionals)
+
+@main.route('/setup-forcado')
+def setup_forcado():
+    from . import db
+    from .models import User
+    from werkzeug.security import generate_password_hash
+
+    db.create_all()
+
+    if not User.query.filter_by(email="admin@tradeconnect.com").first():
+        admin = User(
+            username="superadmin",
+            email="admin@tradeconnect.com",
+            password=generate_password_hash("UltraSecurePass123"),
+            role="Admin",
+            address="Admin HQ",
+            is_active=True
+        )
+        db.session.add(admin)
+
+    if not User.query.filter_by(email="cliente@tradeconnect.com").first():
+        client = User(
+            username="clientezin",
+            email="cliente@tradeconnect.com",
+            password=generate_password_hash("Cliente123"),
+            role="Client",
+            address="Rua do Cliente",
+            is_active=True
+        )
+        db.session.add(client)
+
+    if not User.query.filter_by(email="pro@tradeconnect.com").first():
+        pro = User(
+            username="profissionalzão",
+            email="pro@tradeconnect.com",
+            password=generate_password_hash("Pro123"),
+            role="Professional",
+            specialty="Eletricista",
+            address="Rua do Profissional",
+            is_active=True
+        )
+        db.session.add(pro)
+
+    db.session.commit()
+    return "✅ Tabelas criadas e usuários inseridos!"

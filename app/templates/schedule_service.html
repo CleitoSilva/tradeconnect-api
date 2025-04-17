@@ -10,13 +10,6 @@
     <!-- 📍 Address input with Google Autocomplete -->
     <input class="form-control mb-2" id="address" name="address" placeholder="Service Address" required>
 
-    <!-- 🧑‍🔧 Select Professional -->
-    <label for="professional_id">Choose a Professional:</label>
-    <select name="professional_id" class="form-select mb-3" required>
-        {% for prof in professionals %}
-        <option value="{{ prof.id }}">{{ prof.username }} — {{ prof.specialty }}</option>
-        {% endfor %}
-    </select>
 
     <!-- 🛰 Hidden fields for coordinates -->
     <input type="hidden" id="latitude" name="latitude">

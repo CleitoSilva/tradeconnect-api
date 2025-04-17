@@ -47,8 +47,6 @@ class Service(db.Model):
 
     client_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
-
-
 # 📝 Review model
 from datetime import datetime  # já deve estar no topo
 
