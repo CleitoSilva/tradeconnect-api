@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>📍 Edit Profile</h2>
+
+<form method="POST">
+    <div class="mb-3">
+        <label for="address" class="form-label">Address</label>
+        <input type="text" id="address" name="address" class="form-control" value="{{ user.address or '' }}" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-save"></i> Save Location
+    </button>
+    <a href="{{ url_for('main.dashboard_client' if user.role == 'Client' else 'main.dashboard_professional') }}" class="btn btn-secondary">Back</a>
+</form>
+
+<!-- Google Maps Autocomplete -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVoEt5W58vz-76LWwftrIHww4FBnvGVmo&libraries=places&callback=initAutocomplete"
+        async defer>
+</script>
+
+<script>
+    // Initialize Google Places autocomplete for the address input
+    function initAutocomplete() {
+        const input = document.getElementById("address");
+        new google.maps.places.Autocomplete(input);
+    }
+</script>
+{% endblock %}

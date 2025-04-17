@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Welcome | TradeConnect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: Arial, sans-serif;
+    }
+
+    .landing-wrapper {
+      display: flex;
+      height: 100vh;
+      width: 100%;
+    }
+
+    .left-half {
+      flex: 1.3; /* AUMENTADO - mais espaço pra imagem */
+      background: url("{{ url_for('static', filename='images/background.jpg') }}") center center no-repeat;
+      background-size: cover;
+    }
+
+    .right-half {
+      flex: 0.7; /* REDUZIDO - menos espaço pro conteúdo */
+      background-color: #f8f9fa;
+      padding: 60px 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: left;
+    }
+
+    .right-half h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #0d6efd;
+      margin-bottom: 20px;
+    }
+
+    .right-half p {
+      font-size: 1.1rem;
+      color: #333;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    .btn-role {
+      width: 230px;
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+    }
+
+    .footer {
+      width: 100%;
+      background: #000;
+      color: #fff;
+      text-align: center;
+      padding: 15px 10px 5px;
+      font-size: 0.9rem;
+    }
+
+    .footer-links a {
+      color: #ccc;
+      margin: 0 12px;
+      text-decoration: none;
+    }
+
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="landing-wrapper">
+    <div class="left-half"></div>
+
+    <div class="right-half">
+      <h1>Welcome to <br> TradeConnect</h1>
+      <p>
+        TradeConnect is a platform designed to connect clients with professionals and streamline service scheduling.
+        We make it easy for everyone to connect, schedule, and manage appointments with a modern, intuitive interface.
+      </p>
+
+      <a href="{{ url_for('main.login') }}?role=Admin" class="btn btn-danger btn-role">Admin</a>
+      <a href="{{ url_for('main.login') }}?role=Professional" class="btn btn-primary btn-role">Professional</a>
+      <a href="{{ url_for('main.login') }}?role=Client" class="btn btn-success btn-role">Client</a>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-links">
+      <a href="{{ url_for('main.about') }}">About</a>
+      <a href="{{ url_for('main.terms') }}">Terms</a>
+      <a href="{{ url_for('main.privacy') }}">Privacy</a>
+    </div>
+    <div>© TradeConnect 2025. All rights reserved.</div>
+  </div>
+
+</body>
+</html>

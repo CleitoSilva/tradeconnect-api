@@ -1,0 +1,86 @@
+﻿{% extends 'base.html' %}
+{% block content %}
+<h1 class="mb-4">Tradesmen Available</h1>
+
+<style>
+    .card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 25px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+        .card img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+        }
+
+    .info {
+        flex: 1;
+    }
+
+        .info h3 {
+            margin: 0;
+        }
+
+        .info p {
+            margin: 5px 0;
+        }
+
+        .info strong {
+            display: inline-block;
+            min-width: 90px;
+        }
+
+    .stars {
+        color: gold;
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+
+    .btn-review {
+        margin-top: 8px;
+    }
+</style>
+
+<!-- 👷 STATIC TRADESMEN LIST (Fake data to simulate real professionals) -->
+{% for pro in professionals %}
+<div class="card">
+    <img src="{{ pro.photo or 'https://randomuser.me/api/portraits/men/' ~ loop.index ~ '.jpg' }}" alt="Photo">
+    <div class="info">
+        <h3>{{ pro.username }}</h3>
+        <p><strong>Specialty:</strong> {{ pro.specialty or 'General Services' }}</p>
+        <p><strong>Location:</strong> {{ pro.address }}</p>
+        <p>{{ pro.bio or 'Experienced tradesman available for home services and maintenance.' }}</p>
+
+        {% set avg_rating = pro.avg_rating if pro.avg_rating is defined else 4 %}
+        <div class="stars">
+            {% for i in range(1, 6) %}
+            {% if i <= avg_rating %}
+            ⭐️
+            {% else %}
+            ☆
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Optional: Pass a real service_id if available -->
+        <a href="{{ url_for('main.submit_review', service_id=1) }}" class="btn btn-outline-primary btn-sm btn-review">Leave a Review</a>
+    </div>
+</div>
+{% endfor %}
+
+{% if professionals|length == 0 %}
+<div class="alert alert-warning">
+    No tradesmen available at the moment.
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>🗺 Professionals on the Map</h2>
+
+<div id="map" style="height: 500px;" class="mb-3"></div>
+
+<a href="{{ url_for('main.dashboard_client') }}" class="btn btn-secondary">Back</a>
+
+<script>
+  function initMap() {
+    const map = new google.maps.Map(document.getElementById("map"), {
+      zoom: 7,
+      center: { lat: 53.3498, lng: -6.2603 } // Dublin
+    });
+
+    const professionalsData = JSON.parse('{{ professionals_json | tojson | safe }}');
+
+    for (let i = 0; i < professionalsData.length; i++) {
+      const prof = professionalsData[i];
+
+      if (prof.latitude && prof.longitude) {
+        new google.maps.Marker({
+          position: { lat: prof.latitude, lng: prof.longitude },
+          map: map,
+          title: prof.username
+        });
+      }
+    }
+  }
+</script>
+
+<script async defer
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVoEt5W58vz-76LWwftrIHww4FBnvGVmo&callback=initMap">
+</script>
+{% endblock %}

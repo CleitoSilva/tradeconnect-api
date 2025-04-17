@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Welcome, {{ user.username }} (Client)</h2>
+
+<!-- 🛠 Schedule new service -->
+<a href="{{ url_for('main.schedule_service') }}" class="btn btn-primary mb-3">Schedule New Service</a>
+
+<!-- 🗺 View professionals on the map -->
+<a href="{{ url_for('main.map_professionals') }}" class="btn btn-outline-success mb-4">View Professionals on Map</a>
+
+{% if services %}
+<h4>Your Scheduled Services:</h4>
+<ul class="list-group">
+    {% for service in services %}
+    <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+        <div class="d-flex align-items-center">
+            <!-- 🖼️ Service Image -->
+            <img src="{{ url_for('static', filename='images/services/' ~ service.description|lower ~ '.jpg') }}"
+                 onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/services/default.jpg') }}';"
+                 alt="Service Image"
+                 class="img-thumbnail me-3"
+                 style="width: 120px; height: 120px; object-fit: cover;">
+
+            <div>
+                <strong>{{ service.description }}</strong><br>
+                {{ service.date }} at {{ service.time }}<br>
+                📍 {{ service.address }}
+            </div>
+        </div>
+
+        <div class="text-end mt-2">
+            {% if service.status == 'Accepted' %}
+            <span class="badge bg-success">Accepted</span>
+            <!-- ⭐ Review Button -->
+            <a href="{{ url_for('main.submit_review', service_id=service.id) }}" class="btn btn-outline-primary btn-sm mt-2">Leave a Review</a>
+            {% elif service.status == 'Rejected' %}
+            <span class="badge bg-danger">Rejected</span>
+            {% else %}
+            <span class="badge bg-warning text-dark">Pending</span>
+            {% endif %}
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>You have no services scheduled.</p>
+{% endif %}
+
+<!-- 💳 PayPal Payment Section -->
+<hr>
+<h4>💳 Pay for a Service</h4>
+<div id="paypal-button-container"></div>
+
+<!-- PayPal SDK -->
+<script src="https://www.paypal.com/sdk/js?client-id=ATjXeiOzfDd-bsCr2VUWsyCzvuF4Ck5g_smdQhbYD7EDTuFk0GKzmiHCsefSGqWr_u8mbH1grPWQ8971&currency=USD"></script>
+
+<script>
+    paypal.Buttons({
+        createOrder: function (data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: '10.00'  // 💰 You can update this value dynamically later
+                    }
+                }]
+            });
+        },
+        onApprove: function (data, actions) {
+            return actions.order.capture().then(function (details) {
+                alert('✅ Payment completed by ' + details.payer.name.given_name);
+            });
+        }
+    }).render('#paypal-button-container');
+</script>
+
+<!-- 🚪 Logout -->
+<a href="{{ url_for('main.logout') }}" class="btn btn-danger mt-4">Logout</a>
+{% endblock %}

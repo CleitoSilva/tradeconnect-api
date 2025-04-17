@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>📍 Services on the Map</h2>
+<div id="map" style="height: 500px;" class="mb-4"></div>
+
+<a href="{{ url_for('main.dashboard_client' if current_user.role == 'Client' else 'main.dashboard_professional') }}" class="btn btn-secondary">Back</a>
+
+<script>
+  function initMap() {
+    const map = new google.maps.Map(document.getElementById("map"), {
+      zoom: 6,
+      center: { lat: 53.3498, lng: -6.2603 } // Exemplo: Dublin
+    });
+
+    const services = JSON.parse(`{{ services_json | tojson | safe }}`);
+
+    services.forEach(s => {
+      if (s.latitude && s.longitude) {
+        const marker = new google.maps.Marker({
+          position: { lat: s.latitude, lng: s.longitude },
+          map: map,
+          title: `${s.description} - ${s.address}`
+        });
+
+        const infoWindow = new google.maps.InfoWindow({
+          content: `
+            <strong>${s.description}</strong><br>
+            ${s.address}<br>
+            ${s.date} at ${s.time}
+          `
+        });
+
+        marker.addListener("click", () => {
+          infoWindow.open(map, marker);
+        });
+      }
+    });
+  }
+</script>
+
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVoEt5W58vz-76LWwftrIHww4FBnvGVmo&callback=initMap">
+</script>
+{% endblock %}
