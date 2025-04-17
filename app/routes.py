@@ -126,6 +126,9 @@ def admin_dashboard():
 def schedule_service():
     if current_user.role != 'Client':
         return redirect(url_for('main.dashboard_client'))
+
+    professionals = User.query.filter_by(role='Professional', is_active=True).all()
+
     if request.method == 'POST':
         service = Service(
             description=request.form['description'],
@@ -134,22 +137,15 @@ def schedule_service():
             address=request.form['address'],
             latitude=request.form.get('latitude'),
             longitude=request.form.get('longitude'),
-            client_id=current_user.id
+            client_id=current_user.id,
+            professional_id=request.form.get('professional_id')
         )
         db.session.add(service)
         db.session.commit()
-        flash('Service scheduled successfully!')
+        flash('Serviço agendado com sucesso!')
         return redirect(url_for('main.dashboard_client'))
-    return render_template('schedule_service.html')
 
-# VIEW PROFESSIONALS
-@main.route('/view_professionals')
-@login_required
-def view_professionals():
-    if current_user.role != 'Client':
-        return redirect(url_for('main.login'))
-    professionals = User.query.filter_by(role='Professional', is_active=True).all()
-    return render_template('view_professionals.html', professionals=professionals)
+    return render_template('schedule_service.html', professionals=professionals)
 
 # REVIEWS
 @main.route('/submit_review/<int:service_id>', methods=['GET', 'POST'])
@@ -287,3 +283,8 @@ def update_status(service_id, new_status):
         flash("Status inválido.")
 
     return redirect(url_for('main.dashboard_professional'))
+
+@main.route('/professionals')
+def professionals_list():
+    professionals = User.query.filter_by(role='Professional', is_active=True).all()
+    return render_template('professionals_list.html', professionals=professionals)

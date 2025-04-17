@@ -10,6 +10,14 @@
     <!-- 📍 Address input with Google Autocomplete -->
     <input class="form-control mb-2" id="address" name="address" placeholder="Service Address" required>
 
+    <!-- 🧑‍🔧 Select Professional -->
+    <label for="professional_id">Choose a Professional:</label>
+    <select name="professional_id" class="form-select mb-3" required>
+        {% for prof in professionals %}
+        <option value="{{ prof.id }}">{{ prof.username }} — {{ prof.specialty }}</option>
+        {% endfor %}
+    </select>
+
     <!-- 🛰 Hidden fields for coordinates -->
     <input type="hidden" id="latitude" name="latitude">
     <input type="hidden" id="longitude" name="longitude">
@@ -18,23 +26,22 @@
 </form>
 
 <!-- 🔌 Google Maps Autocomplete -->
-<script
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVoEt5W58vz-76LWwftrIHww4FBnvGVmo&libraries=places&callback=initAutocomplete"
-  async defer>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVoEt5W58vz-76LWwftrIHww4FBnvGVmo&libraries=places&callback=initAutocomplete"
+        async defer>
 </script>
 
 <script>
-  function initAutocomplete() {
-    const input = document.getElementById("address");
-    const autocomplete = new google.maps.places.Autocomplete(input);
+    function initAutocomplete() {
+        const input = document.getElementById("address");
+        const autocomplete = new google.maps.places.Autocomplete(input);
 
-    autocomplete.addListener("place_changed", function () {
-      const place = autocomplete.getPlace();
-      if (place.geometry) {
-        document.getElementById("latitude").value = place.geometry.location.lat();
-        document.getElementById("longitude").value = place.geometry.location.lng();
-      }
-    });
-  }
+        autocomplete.addListener("place_changed", function () {
+            const place = autocomplete.getPlace();
+            if (place.geometry) {
+                document.getElementById("latitude").value = place.geometry.location.lat();
+                document.getElementById("longitude").value = place.geometry.location.lng();
+            }
+        });
+    }
 </script>
 {% endblock %}

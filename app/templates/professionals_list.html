@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Available Professionals</h2>
+<ul class="list-group">
+    {% for prof in professionals %}
+    <li class="list-group-item">
+        <strong>{{ prof.username }}</strong><br>
+        Specialty: {{ prof.specialty }}<br>
+        Email: {{ prof.email }}
+    </li>
+    {% else %}
+    <li class="list-group-item">No professionals found.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
