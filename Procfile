@@ -1,1 +1,1 @@
-web: gunicorn main:app
+python create_admin.py
